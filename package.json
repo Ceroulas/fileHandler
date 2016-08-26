@@ -1,0 +1,28 @@
+{
+  "name": "filehandler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "nodemon": "nodemon server.js",
+    "start": "npm run nodemon"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ceroulas/fileHandler.git"
+  },
+  "author": "jonathan.martinelli",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ceroulas/fileHandler/issues"
+  },
+  "homepage": "https://github.com/Ceroulas/fileHandler#readme",
+  "dependencies": {
+    "express": "^4.14.0",
+    "fs": "0.0.1-security"
+  },
+  "devDependencies": {
+    "autoinstall": "^0.3.1",
+    "nodemon": "^1.10.2"
+  }
+}
