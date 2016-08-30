@@ -4,16 +4,19 @@ var watch = require('watch');
 var readline = require('readline');
 var fs = require('fs');
 
+var Saleman = require('./salesman.js');
+var Costumer = require('./costumer.js');
+
 var infoMap = new Map();
 var salesArr = [];
 var costumerArr = [];
 var salemanArr  = [];
 
 watch.createMonitor(__dirname+'/data/in/', function(monitor){
-	monitor.on("created", function(f, stat){
-		console.log('File created: '+ f)
-		manipulateFiles(f);
-	});
+		monitor.on("created", function(f, stat){
+			console.log('File created: '+ f)
+			manipulateFiles(f);
+		});
 });
 
 function manipulateFiles(inputfileName){
@@ -96,7 +99,7 @@ function fillSalemanInfo(splitLine){
 		infoMap.set('salemanCount', Saleman.count);	
 	}
 	
-};
+}
 
 function fillCostumerInfo(splitLine){
 	var cnpj = splitLine[1];
@@ -109,7 +112,7 @@ function fillCostumerInfo(splitLine){
 		infoMap.set('costumerCount', Costumer.count);
 	}
 	
-};
+}
 
 function findIfExistent(array, findCode){
 
@@ -133,7 +136,7 @@ function fillSalesInfo(splitLine){
 
 	var obj = { saleman: salemanName, value: valSale};
 	salesArr.push(obj);
-};
+}
 
 function calculateSalesFromSaleman(splitLine){
 	var salesFromSaleman = replaceAll(splitLine, ',', ' ');
@@ -153,7 +156,7 @@ function replaceAll(str, find, replace) {
   return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
 }
 function escapeRegExp(str) {
-    return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+  return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 }
 
 
