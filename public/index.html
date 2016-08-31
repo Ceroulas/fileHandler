@@ -13,25 +13,28 @@
     <div class="container" ng-controller="UploadController">
         <h1>Upload File App</h1><br>
         <div class="form-group">
-            <form id="contact-form" class="form-inline">
-            	<div class="btn-group btn-group-lg">
+            <ng-form name="myForm" id="contact-form" class="form-inline">
+	            <div class="form-group">     
+
+	                <input name="fileInput" id="input-1" type="file" class="form-control input-lg" ng-model="myFile" file-model="myFile" ng-required="true" ng-accept="'.dat'"/>
 	                
-	                <input id="input-1" required type="file" class="file btn btn-default" required file-model="myFile" />
+	                <button id="uploadFile" type="submit" class="btn btn-success btn-lg" ng-click="uploadFile()" ng-disabled="myForm.$invalid || isProcessing"> Upload File </button>
+	                <label class="text-danger bg-danger" ng-show="myForm.$invalid">*File is required</label>  
+	            </div-->     
+            </ng-form>
 
-	                <button id="uploadFile" type="submit" style="padding-bottom:13px;" form="contact-form" class="btn btn-success" ng-click="uploadFile()" ng-disabled="isProcessing">Upload File</button>
-	            </div>    
-            </form>
-        </div>
-    <pre class="text-info">
-    	<p class ="pull-left">{{ content }}</p>
-    </pre>
-
+        </div><br><br>
+        <pre class="text-info">
+    		<p class ="lead pull-left">{{ content }}</p>
+    	</pre>
+   
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js" type="text/javascript"></script>
     <script src="app.module.js" type="text/javascript"></script>
     <script src="uploadfile/uploadfile.controller.js" type="text/javascript"></script>
     <script src="uploadfile/uploadfile.service.js" type="text/javascript"></script>
+    <script src="uploadfile/verifydatfile.service.js" type="text/javascript"></script>
     <script src="uploadfile/uploadfile.directive.js" type="text/javascript"></script>
 </body>
 </html>
