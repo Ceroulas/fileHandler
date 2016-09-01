@@ -5,25 +5,28 @@ describe('UploadController function', function() {
 
     beforeEach(module('uploadApp'));
 
-    beforeEach(inject(function($rootScope, $controller, fileUpload, verifyDatFile) {
-      
-      scope =  $rootScope.$new();
-      mockFileUpload = fileUpload;
-      mockVerifyDatFile =  verifyDatFile;
-      
-      spyOn(mockFileUpload, 'uploadFileToUrl');
-      spyOn(mockVerifyDatFile, 'verifyIfIsDatFile');
+    beforeEach(
 
-      UploadController = $controller('UploadController', {
-        $scope: scope,
-        fileUpload: mockFileUpload,
-        verifyDatFile: mockVerifyDatFile
-      });
+      mockFileUpload = jasmine.createSpyObj( 'fileUpload', 'uploadFileToUrl');
+      mockVerifyDatFile = jasmine.createSpyObj( 'verifyDatFile' , 'verifyIfIsDatFile');
+
+      inject(function($rootScope, $controller, fileUpload, verifyDatFile) {
+        
+        scope =  $rootScope.$new();
+        
+        mockFileUpload.uploadFileToUrl
+
+
+        UploadController = $controller('UploadController', {
+          $scope: scope,
+          fileUpload: mockFileUpload,
+          verifyDatFile: mockVerifyDatFile
+        });
     }));
 
     it('should call fileUpload method', function() {
         expect(mockFileUpload.uploadFileToUrl).toHaveBeenCalled();
-        expect(UploadController.isProcessing).toBe(true);
+        expect(scope.content).toEqual('Output file not ready!');
     });
 
   });
