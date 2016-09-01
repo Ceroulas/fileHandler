@@ -4,40 +4,61 @@ var watch = require('watch');
 var readline = require('readline');
 var fs = require('fs');
 
-var verifyIfDatFile = require('./verifyifisdatfile.js');
 var fileManipulator = require('./filemanipulator.js');
+var utils = require('./utils.js')
+var pathIn = __dirname+'/../data/in/';
 
-watch.createMonitor(__dirname+'/../data/in/', function(monitor){
-		monitor.on("created", function(f, stat){
-			console.log('File created: '+ f)
-			registerFile(f);
+watch.createMonitor(pathIn, function(monitor){
+		monitor.on("created", function(file, stat){
+			console.log('File created: '+ file)
+			configFile(file);
 		});
 });
 
-function registerFile(inputfileName){
-	var outputName = inputfileName.split(/(\\|\/)/g).pop();
-	var outputNameWithoutExt = outputName.substring(outputName.lastIndexOf('/')+1, outputName.lastIndexOf('.'));
-
-	if(verifyIfDatFile(outputName)){
-
-		var ws = fs.createWriteStream(__dirname+'/../data/out/'+outputNameWithoutExt+'.done.dat');
-
-		var lineReader = readline.createInterface({
-		  input: fs.createReadStream(inputfileName)
-		});
-
-		lineReader.on('line', function (line) {
-		  	fileManipulator.readInfoFromLine(line);	  		
-		});
-		lineReader.on('close', function(){
-
-			ws.write('Amount of clients in the input file: '+ fileManipulator.getInfoMap('costumerCount') + '\n' 
-					+ 'Amount of salesman in the input file: '+ fileManipulator.getInfoMap('salemanCount') + '\n'
-					+ 'ID of the most expensive sale: '+fileManipulator.calculateMostExpensiveSale()+ '\n'
-					+ 'Worst salesman ever: '+fileManipulator.calculateWorstSaleman()+ '\n');
-			ws.close();
-			fileManipulator.resetInfosFromArrays();
-			lineReader.close();
-		});
+function configFile(inputFile){
+	var inputFileName = utils.findFileName(inputFile);
+	
+	if(utils.verifyIfDatFile(inputFileName)){
+		var inputNameWithoutExt = utils.fileWithoutExtension(inputFileName);
+		configStreams(inputNameWithoutExt,inputFile);
 	}	
+}
+
+function configStreams(inputNameWithoutExt,inputFile){
+	var writeStream = configWriteStream(inputNameWithoutExt);
+	configReadStream(writeStream, inputFile);
+}
+
+function configWriteStream(inputNameWithoutExt){
+	return fs.createWriteStream(__dirname+'/../data/out/'+inputNameWithoutExt+'.done.dat');
+}
+
+function configReadStream(writeStream, inputFile){
+	var lineReader = readline.createInterface({
+	  input: fs.createReadStream(inputFile)
+	});
+	readInputFile(lineReader, writeStream);
+}
+
+function readInputFile(lineReader,writeStream){
+	lineReader.on('line', function (line) {
+	  	fileManipulator.readInfoFromLine(line);	  		
+	});
+	lineReader.on('close', function(){
+		registerOutputFile(writeStream);
+		closeStreams(writeStream, lineReader);
+	});
+}
+
+function registerOutputFile(writeStream){
+	writeStream.write('Amount of clients in the input file: '+ fileManipulator.getInfoMap('costumerCount') + '\n' 
+			+ 'Amount of salesman in the input file: '+ fileManipulator.getInfoMap('salesmanCount') + '\n'
+			+ 'ID of the most expensive sale: '+fileManipulator.calculateMostExpensiveSale()+ '\n'
+			+ 'Worst salesman ever: '+fileManipulator.calculateWorstSalesman()+ '\n');
+}
+
+function closeStreams(writeStream, lineReader){
+	writeStream.close();
+	fileManipulator.resetInfosFromArrays();
+	lineReader.close();
 }

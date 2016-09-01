@@ -1,25 +1,29 @@
 'use strict';
 var multer = require('multer');
 var watch = require('watch');
+var utils = require('./utils.js')
+
+var pathOut = __dirname+'/../data/out/';
+var urlPost = '/fileUpload';
+
+var storage = multer.diskStorage({
+	destination: function(req, file, cb){
+		cb(null, 'data/in/');
+	},
+	filename: function(req, file, cb){
+		cb(null, file.originalname);
+	}
+});
+
+var upload = multer({ storage: storage});
 
 module.exports = function(app) {
 
-	var storage = multer.diskStorage({
-		destination: function(req, file, cb){
-			cb(null, 'data/in/');
-		},
-		filename: function(req, file, cb){
-			cb(null, file.originalname);
-		}
-	});
+	app.post(urlPost, upload.any(), function(req, res){
+		var outputName = utils.findFileName(req.files[0].filename);
+		var outputNameWithoutExt = utils.fileWithoutExtension(outputName);
 
-	var upload = multer({ storage: storage});
-
-	app.post('/fileUpload', upload.any(), function(req, res){
-		var outputName = req.files[0].filename.split(/(\\|\/)/g).pop();
-		var outputNameWithoutExt = outputName.substring(outputName.lastIndexOf('/')+1, outputName.lastIndexOf('.'));
-		
-		watch.createMonitor(__dirname+'/../data/out/', function(monitor){
+		watch.createMonitor(pathOut, function(monitor){
 			monitor.once("created", function(file, stat){
 				console.log('File created: '+ file)
 				res.sendFile(file);

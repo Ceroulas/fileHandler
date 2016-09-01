@@ -1,38 +1,44 @@
 'use strict';
 
-var Saleman = require('./models/salesman.js');
+var Salesman = require('./models/salesman.js');
 var Costumer = require('./models/costumer.js');
+var utils = require('./utils.js')
+
+const ATTR_SEPARATOR = 'ç';
+const SALESMAN_ID = '001';
+const COSTUMER_ID = '002';
+const SALE_ID = '003';
 
 var infoMap = new Map();
 var salesArr = [];
 var costumerArr = [];
-var salemanArr  = [];
-
-exports.infoMap;
+var salesmanArr  = [];
 
 module.exports = {
 
 	readInfoFromLine: function(line){
-		var splitLine = line.split('ç');
+		var splitLine = line.split(ATTR_SEPARATOR);
 		switch(splitLine[0]){
-			case '001':
-				fillSalemanInfo(splitLine);
+			case SALESMAN_ID:
+				fillSalesmanInfo(splitLine);
 				break;
-			case '002':
+			case COSTUMER_ID:
 				fillCostumerInfo(splitLine);
 				break;
-			default:
+			case SALE_ID:
 				fillSalesInfo(splitLine);
+				break;
+			default:
+				console.error("Wrong ID code!");	
 		}
-
 	},
 
 	resetInfosFromArrays: function(){
-		Saleman.count = 0;
+		Salesman.count = 0;
 		Costumer.count = 0;
 		infoMap.clear();
 		salesArr.length = 0;
-		salemanArr.length = 0;
+		salesmanArr.length = 0;
 		costumerArr.length = 0;
 	},
 
@@ -41,36 +47,31 @@ module.exports = {
 	},
 
 	calculateMostExpensiveSale: function() {
-	
-	var maxSale = Math.max.apply(null, salesArr.map(function(sale){return sale.value}));
-
-	return maxSale;
+		return Math.max.apply(null, utils.mapArray(salesArr));
 	},
 
-	calculateWorstSaleman: function() {
-		var minSale = Math.min.apply(null, salesArr.map(function(sale){return sale.value;}));
-		var worstSaleman = '';
+	calculateWorstSalesman: function() {
+		var minSale = Math.min.apply(null, utils.mapArray(salesArr));
+		var worstSalesman = '';
 		for (var i = 0, len = salesArr.length; i < len; i++) {
 	    	if(salesArr[i].value == minSale){	    	
-	    		worstSaleman = salesArr[i].saleman;
+	    		worstSalesman = salesArr[i].salesman;
 	    	}	
 		}
-		
-		return worstSaleman;
+		return worstSalesman;
 	}
 };
 
-function fillSalemanInfo(splitLine){
+function fillSalesmanInfo(splitLine){
 	var cpf = splitLine[1];
 	var name = splitLine[2];
 	var salary = splitLine[3];
 
-	if(!findIfExistent(salemanArr, cpf)){
-		salemanArr.push(cpf);
-		var newSaleman = new Saleman(cpf, name, salary);
-		infoMap.set('salemanCount', Saleman.count);	
-	}
-	
+	if(!utils.findIfExistentInArray(salesmanArr, cpf)){
+		salesmanArr.push(cpf);
+		var newSalesman = new Salesman(cpf, name, salary);
+		infoMap.set('salesmanCount', Salesman.count);
+	}	
 }
 
 function fillCostumerInfo(splitLine){
@@ -78,58 +79,31 @@ function fillCostumerInfo(splitLine){
 	var name = splitLine[2];
 	var businessArea = splitLine[3];
 
-	if(!findIfExistent(costumerArr, cnpj)){
+	if(!utils.findIfExistentInArray(costumerArr, cnpj)){
 		costumerArr.push(cnpj);
 		var newCostumer = new Costumer(cnpj, name, businessArea);
 		infoMap.set('costumerCount', Costumer.count);
 	}
-	
-}
-
-function findIfExistent(array, findCode){
-
-	if(array.length > 0){
-		for(var i = 0; i < array.length; i++){
-			if(array[i] == findCode)
-				return true;
-		}
-		return false;
-	}else{
-		return false;
-	}
-
 }
 
 function fillSalesInfo(splitLine){
 	var id = splitLine[1];
-	var salemanName = splitLine[3];
+	var salesmanName = splitLine[3];
+	var valSale = calculateSalesFromSalesman(splitLine[2]);
 
-	var valSale = calculateSalesFromSaleman(splitLine[2]);
-
-	var obj = { saleman: salemanName, value: valSale};
-	salesArr.push(obj);
+	var saleObj = { salesman: salesmanName, value: valSale};
+	salesArr.push(saleObj);
 }
 
-function calculateSalesFromSaleman(splitLine){
-	var salesFromSaleman = replaceAll(splitLine, ',', ' ');
-	salesFromSaleman = salesFromSaleman.replace('[', '');
-	salesFromSaleman = salesFromSaleman.replace(']', '');
+function calculateSalesFromSalesman(splitLine){
+	var salesFromSalesman = splitLine.replace(/[\[\]]+/g, '');
+	var saleSplit = salesFromSalesman.split(',');
 
-	var saleSplit = salesFromSaleman.split(' ');
 	var sumSales = 0;
-	
 	for(var i=0; i<saleSplit.length; i++){
 		sumSales += calculateValueOfSale(saleSplit[i]);	
 	}
 	return sumSales;
-}
-
-function replaceAll(str, find, replace) {
-  return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
-}
-
-function escapeRegExp(str) {
-  return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 }
 
 function calculateValueOfSale(saleSplit){
